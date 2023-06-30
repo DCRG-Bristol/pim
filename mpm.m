@@ -31,8 +31,6 @@ function mpm(action, varargin)
 %   % List all installed packages
 %   mpm freeze
 %
-%   % Change the folder added to the path in an already installed package
-%   mpm set test -n folder_name_to_add
 %
 % To modify the default behavior of the above commands,
 % the following optional arguments are available:
@@ -99,12 +97,6 @@ function mpm(action, varargin)
         return;
     end
 
-    % mpm set
-    if strcmpi(opts.action, 'set')
-        changePackageOptions(package, opts);
-        return;
-    end
-
     % mpm uninstall
     if strcmpi(opts.action, 'uninstall')
         removePackage(package, opts);
@@ -141,7 +133,7 @@ function success = findAndSetupPackage(package, opts)
         if ~opts.localInstall
             disp(i18n('setup_download', package.url));
         else
-            disp(i18n('setup_install'));
+        disp(i18n('setup_install', package.name));
         end
         [package, isOk] = installPackage(package, opts);
         if ~isempty(package) && isOk
@@ -178,9 +170,11 @@ function removePackage(package, opts)
     for ii = 1:numel(removalQueue)
         package = removalQueue(ii);
 
+    % remove from path
+    updatePath(package,opts,"isRemove",true);
+
         % check for uninstall file
-        dirPath = fullfile(package.installDir, package.mdir);
-        checkForFileAndRun(dirPath, 'uninstall.m', opts);
+    checkForFileAndRun(package.installDir, 'uninstall.m', opts);
 
         if exist(package.installDir, 'dir')
             % remove old directory
@@ -211,57 +205,6 @@ function dispTree(name)
         elseif ~endsWith(folderNames{i}, '.')
             disp([char(9500) char(9472) char(9472) char(9472) folderNames{i}])
         end
-    end
-end
-
-function changePackageOptions(package, opts)
-    % find existing package
-    packageMetadata = opts.metadata.packages;
-    [~, ix] = indexInMetadata(package, packageMetadata);
-    if ~any(ix)
-        warning(i18n('update_404', package.name));
-        return;
-    end
-    assert(sum(ix) == 1, i18n('options_conflict'));
-    oldPackage = packageMetadata(ix);
-
-    % update options
-    if opts.noPaths
-        disp(i18n('update_nopaths', package.name));
-        oldPackage.addPath = false;
-    end
-    if package.addAllDirsToPath
-        disp(i18n('update_pathdirs', package.name));
-        oldPackage.addAllDirsToPath = true;
-        if ~oldPackage.addPath
-            disp(i18n('update_addpath'));
-            oldPackage.addPath = true;
-        end
-    end
-    if ~isempty(package.internalDir)
-        if exist(fullfile(oldPackage.installDir, package.internalDir), 'dir')
-            oldPackage.mdir = package.internalDir;
-            oldPackage.internalDir = package.internalDir;
-            disp(i18n('update_package', package.name, package.internalDir));
-            if ~oldPackage.addPath
-                disp(i18n('update_addpath'));
-                oldPackage.addPath = true;
-            end
-        else
-            if numel(folderNames) == 0
-                warning(i18n('internal_no_dirs'));
-            else
-                warning(i18n('internal_nosuchdir'));
-                dispTree(oldPackage.installDir);
-            end
-        end
-    end
-
-    % write new metadata to file
-    packageMetadata(ix) = oldPackage;
-    packages = packageMetadata;
-    if ~opts.debug
-        save(opts.metafile, 'packages');
     end
 end
 
@@ -534,12 +477,13 @@ function [package, isOk] = installPackage(package, opts)
             end
         else % no copy; just track the provided path
             % make sure we have absolute path
-            if ~isempty(strfind(package.url, pwd))
+        file=java.io.File(package.url);
+        if file.isAbsolute()
                 absPath = package.url;
-            else % try making it ourselves
-                absPath = fullfile(pwd, package.url);
+        else
+            absPath = char(file.getCanonicalPath());
             end
-            if ~exist(absPath, 'dir')
+        if ~file.isDirectory
                 warning(i18n('install_404', absPath));
                 isOk = false; return;
             else
@@ -556,8 +500,7 @@ function [package, isOk] = installPackage(package, opts)
 
     if isOk
         % check for install.m and run after confirming
-        dirPath = fullfile(package.installDir, package.mdir);
-        checkForFileAndRun(dirPath, 'install.m', opts);
+    checkForFileAndRun(package.installDir, 'install.m', opts);
     end
 
 end
@@ -624,31 +567,44 @@ end
 
 function mdir = findMDirOfPackage(package)
 % find mdir (folder containing .m files that we will add to path)
-
+mdir = "";
     if ~package.addPath
-        mdir = '';
         return;
     end
     if ~isempty(package.internalDir)
         if exist(fullfile(package.installDir, package.internalDir), 'dir')
-            mdir = package.internalDir;
+        mdir = string(package.internalDir);
             return;
         else
             warning(i18n('internal_nosuchdir'));
             dispTree(package.installDir);
         end
     end
-
+% check if pathlist file exist if so use this to define mdirs
+pathfile = fullfile(package.installDir, 'pathList.txt');
+if exist(pathfile,'file')
+    local_paths = readlines(pathfile);
+    idx = 1;
+    for i = 1:length(local_paths)
+        path2add = fullfile(package.installDir,local_paths(i));
+        file=java.io.File(path2add);
+        if file.exists && file.isDirectory
+            mdir(idx) = local_paths(i);
+            idx = idx+1;
+        end
+    end
+    return
+end
 	folderNames = dir(fullfile(package.installDir, '*.m'));
     if ~isempty(folderNames)
-        mdir = ''; % all is well; *.m files exist in base directory
+    % all is well; *.m files exist in base directory
         return;
     else
-        M_DIR_ORDER = {'bin', 'src', 'lib', 'code'};
+    M_DIR_ORDER = {'bin', 'src', 'lib', 'code','tbx'};
         for ii = 1:numel(M_DIR_ORDER)
             folderNames = dir(fullfile(package.installDir, M_DIR_ORDER{ii}, '*.m'));
             if ~isempty(folderNames)
-                mdir = M_DIR_ORDER{ii};
+            mdir = string(M_DIR_ORDER{ii});
                 return;
             end
         end
@@ -657,7 +613,6 @@ function mdir = findMDirOfPackage(package)
     disp(i18n('mdir_help', package.name));
     dispTree(package.installDir);
     tree
-    mdir = '';
 end
 
 function [m, metafile] = getMetadata(opts)
@@ -715,8 +670,8 @@ function [m, metafile] = getMetadata(opts)
         end
 
         % handle manually-deleted packages by skipping if dir doesn't exist
-        dirPath = fullfile(package.installDir, package.mdir);
-        if exist(dirPath, 'dir')
+    dirPaths = fullfile(package.installDir, package.mdir);
+    if all(arrayfun(@(x)exist(x,'file'),dirPaths))
             cleanPackages = [cleanPackages package];
         end
     end
@@ -780,35 +735,41 @@ function updatePaths(opts)
     end
 end
 
-function success = updatePath(package, opts)
+function success = updatePath(package, opts,fopts)
+arguments
+    package
+    opts
+    fopts.isRemove = false;
+end
     success = false;
     if ~package.addPath
         return;
     end
-    dirPath = fullfile(package.installDir, package.mdir);
+for i = 1:length(package.mdir)
+    dirPath = fullfile(package.installDir, package.mdir(i));
     if exist(dirPath, 'dir')
         success = true;
         if ~opts.debug
             disp(i18n('updatepath_op', dirPath));
+            if  fopts.isRemove
+                rmpath(dirPath);
+            else
             addpath(dirPath);
+            end
         end
 
         % add all folders to path
         if package.addAllDirsToPath
             disp(i18n('updatepath_all'));
+            if  fopts.isRemove
+                rmpath(genpath(dirPath));
+            else
             addpath(genpath(dirPath));
-
-        else % check for pathList.m file
-            pathfile = fullfile(dirPath, 'pathList.m');
-            pathsToAdd = checkForPathlistAndGenpath(pathfile, dirPath);
-            if numel(pathsToAdd) > 0 && ~opts.debug
-                disp(i18n('updatepath_pathlist'));
-                addpath(pathsToAdd);
             end
         end
     else
         warning(i18n('updatepath_404', dirPath));
-        return;
+    end
     end
 end
 
@@ -1194,35 +1155,6 @@ function checkForFileAndRun(installDir, fileName, opts)
 
     % run
     run(fpath);
-end
-
-function pathList = checkForPathlistAndGenpath(fpath, basedir)
-
-    pathList = '';
-
-    fid = fopen(fpath);
-    if fid == -1
-        return;
-    end
-
-    line = '';
-    while ~isnumeric(line)
-        line = fgetl(fid);
-        if ~isnumeric(line) && numel(line) > 0
-            if strcmpi(line(end), '*')
-                % e.g., etc/* => etc/x:
-                curPath = genpath(fullfile(basedir, line(1:end-1)));
-            else
-                % add just this one dir
-                curPath = [fullfile(basedir, line) ':'];
-            end
-            pathList = [pathList curPath];
-        end
-    end
-
-    if fid ~= -1
-        fclose(fid);
-    end
 end
 
 function str = i18n(key, varargin)
