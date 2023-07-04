@@ -2,15 +2,17 @@
 
 A simple package manager for Matlab (inspired by [pip](https://github.com/pypa/pip)). Downloads packages from Matlab Central's File Exchange, GitHub repositories, or any other url pointing to a .zip file.
 
+This has been slightly edited to suite the style used in the dcrg repositories.
+
 ## Quickstart
 
-Download/clone this repo and add it to your Matlab path (using `addpath`). Now try the following:
+Download/clone this repo and add it to your Matlab  (using `add`). Now try the following:
 
 - `mpm install [package-name]`: install package by name
 - `mpm uninstall [package-name]`: remove package, if installed
 - `mpm search [package-name]`: search for package given name (checks Github and Matlab File Exchange)
 - `mpm freeze`: lists all packages currently installed
-- `mpm init`: adds all installed packages to path (run when Matlab starts up)
+- `mpm init`: adds all installed packages to  (run when Matlab starts up)
 
 ## More details
 
@@ -22,7 +24,7 @@ __Install (searches FileExchange and Github):__
 >> mpm install export_fig
 ```
 
-When installing, mpm checks for a file in the package called `install.m`, which it will run after confirming (or add `--force` to auto-confirm). It also checks for a file called `pathlist.m` which tells it which paths (if any) to add.
+When installing, mpm checks for a file in the package called `install.m`, which it will run after confirming (or add `--force` to auto-confirm). It also checks for a file called `pathlist.twt` which tells it which paths (if any) to add.
 
 __Install a Github release (by tag, branch, or commit)__
 
@@ -127,7 +129,7 @@ If you restart Matlab, you'll want to run `mpm init` to re-add all the folders i
 
 ## Troubleshooting
 
-Because there's no standard directory structure for a Matlab package, automatically adding paths can get a bit messy. When mpm downloads a package, it adds a single folder within that package to your Matlab path. If there are no `*.m` files in the package's base directory, it looks in folders called 'bin', 'src', 'lib', or 'code' instead. You can specify the name of an internal directory by passing in an `-n` or `internaldir` argument. To install a package without modifying any paths, set `--nopaths`. Or to add _all_ subfolders in a package to the path, set `--allpaths`.
+Because there's no standard directory structure for a Matlab package, automatically adding paths can get a bit messy. When mpm downloads a package, it adds a single folder within that package to your Matlab path. If there are no `*.m` files in the package's base directory, it looks in folders called 'bin', 'src', 'lib', or 'code' instead. You can specify the name of an internal directory by passing in an `-n` or `internaldir` argument. To install a package without modifying any s, set `--nos`. Or to add _all_ subfolders in a package to the , set `--alls`.
 
 Mpm keeps track of the packages it's downloaded in a file called `mpm.mat`, within each installation directory.
 
