@@ -6,7 +6,7 @@ This has been slightly edited to suite the style used in the dcrg repositories.
 
 ## Quickstart
 
-Download/clone this repo and add it to your Matlab  (using `add`). Now try the following:
+Download/clone this repo and add it to your Matlab path. To persevre this after install please add the following two line to you [`startup.m` script](https://uk.mathworks.com/help/matlab/ref/startup.html). Now try the following:
 
 - `mpm install [package-name]`: install package by name
 - `mpm uninstall [package-name]`: remove package, if installed
