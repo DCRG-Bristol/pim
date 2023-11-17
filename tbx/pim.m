@@ -624,6 +624,9 @@ function [m, metafile] = getMetadata(opts)
         save(metafile, 'packages');
         m.packages = packages;
     else
+        if ~exist(opts.metadir, 'dir')
+           mkdir(opts.metadir)
+        end
         m = struct();
     end
 
