@@ -362,7 +362,7 @@ function url = findUrlOnGithub(package)
     % ' ' will be replaced by '+', which seems necessary
     % ':' for search qualifiers can be sent encoded on the other hand
     qUrl = 'https://api.github.com/search/repositories';
-    qReq = [query, ' language:matlab'];
+    qReq = [query, ' language:matlab fork:true'];
     html = webread(qUrl, 'q', qReq);
     if isempty(html) || ~isfield(html, 'items') || isempty(html.items)
         return;
