@@ -4,7 +4,7 @@
 _old/
 
 # exclude everything
-pim-packages/*
+**/pim-packages/*
 *.mltbx
 
 
