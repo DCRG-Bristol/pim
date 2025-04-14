@@ -176,7 +176,7 @@ function removePackage(package, opts)
         % check for uninstall file
     checkForFileAndRun(package.installDir, 'uninstall.m', opts);
 
-        if exist(package.installDir, 'dir')
+        if isfolder(package.installDir)
             % remove old directory
             if ~package.noRmdirOnUninstall
                 rmdir(package.installDir, 's');
@@ -400,11 +400,11 @@ function [package, isOk] = installPackage(package, opts)
     isOk = true;
 
     % check for previous package
-    if exist(package.installDir, 'dir') && ~opts.force
+    if isfolder(package.installDir) && ~opts.force
         warning(i18n('install_conflict'));
         isOk = false;
         return;
-    elseif exist(package.installDir, 'dir')
+    elseif isfolder(package.installDir)
         % remove old directory
         disp(i18n('install_remove_previous'));
         rmdir(package.installDir, 's');
@@ -435,14 +435,14 @@ function [package, isOk] = installPackage(package, opts)
         end
     else % local install (using pre-existing local directory)
         % make sure path exists
-        if ~exist(package.url, 'dir')
+        if ~isfolder(package.url)
             warning(i18n('install_nosuchdir', package.url));
             isOk = false; return;
         end
 
         % copy directory to installDir
         if ~opts.localInstallUseLocal
-            if ~exist(package.url, 'dir')
+            if ~isfolder(package.url)
                 warning(i18n('install_404', package.url));
                 isOk = false; return;
             end
@@ -548,7 +548,7 @@ mdir = "";
         return;
     end
     if ~isempty(package.internalDir)
-        if exist(fullfile(package.installDir, package.internalDir), 'dir')
+        if isfolder(fullfile(package.installDir, package.internalDir))
         mdir = string(package.internalDir);
             return;
         else
@@ -558,7 +558,7 @@ mdir = "";
     end
 % check if pathlist file exist if so use this to define mdirs
 pathfile = fullfile(package.installDir, 'pathList.txt');
-if exist(pathfile,'file')
+if isfile(pathfile)
     local_paths = readlines(pathfile);
     idx = 1;
     for i = 1:length(local_paths)
@@ -588,13 +588,13 @@ end
     warning(i18n('mdir_404'));
     disp(i18n('mdir_help', package.name));
     dispTree(package.installDir);
-    tree
+    % tree
 end
 
 function [m, metafile] = getMetadata(opts)
 
     metafile = fullfile(opts.metadir, 'pim.mat');
-    if exist(metafile, 'file')
+    if isfile(metafile)
         m = load(metafile);
         packages = [];
         for ii = 1:numel(m.packages)
@@ -624,7 +624,7 @@ function [m, metafile] = getMetadata(opts)
         save(metafile, 'packages');
         m.packages = packages;
     else
-        if ~exist(opts.metadir, 'dir')
+        if ~isfolder(opts.metadir)
            mkdir(opts.metadir)
         end
         m = struct();
@@ -650,7 +650,7 @@ function [m, metafile] = getMetadata(opts)
 
         % handle manually-deleted packages by skipping if dir doesn't exist
     dirPaths = fullfile(package.installDir, package.mdir);
-    if all(arrayfun(@(x)exist(x,'file'),dirPaths))
+    if all(isfolder(dirPaths))
             cleanPackages = [cleanPackages package];
         end
     end
@@ -726,7 +726,7 @@ end
     end
 for i = 1:length(package.mdir)
     dirPath = fullfile(package.installDir, package.mdir(i));
-    if exist(dirPath, 'dir')
+    if isfolder(dirPath)
         success = true;
         if ~opts.debug
             disp(i18n('updatepath_op', dirPath));
