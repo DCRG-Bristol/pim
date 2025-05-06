@@ -10,7 +10,7 @@
 -	now use a pathlist.txt file instead of pathlist.m to define folders to add
 -	changed name from mpm to pim to avoid the new mpm function in MATLAB 2022b</param.description>
     <param.screenshot>${PROJECT_ROOT}\logo.png</param.screenshot>
-    <param.version>2.1.2</param.version>
+    <param.version>2.2.0</param.version>
     <param.output>${PROJECT_ROOT}\pim.mltbx</param.output>
     <param.products.name />
     <param.products.id />
@@ -106,10 +106,12 @@ logo.svg
       <file>${PROJECT_ROOT}\tbx</file>
     </fileset.rootdir>
     <fileset.rootfiles>
+      <file>${PROJECT_ROOT}\tbx\@PimPackage</file>
       <file>${PROJECT_ROOT}\tbx\pim-packages</file>
       <file>${PROJECT_ROOT}\tbx\pim.m</file>
       <file>${PROJECT_ROOT}\tbx\pim_config.m</file>
-      <file>${PROJECT_ROOT}\tbx\pim_nls.mat</file>
+      <file>${PROJECT_ROOT}\tbx\PimOpts.m</file>
+      <file>${PROJECT_ROOT}\tbx\private</file>
     </fileset.rootfiles>
     <fileset.depfun.included />
     <fileset.depfun.excluded />
