@@ -256,7 +256,7 @@ function updatePaths(opts)
 namesAdded = {};
 if opts.updatePimPaths
     for ii = 1:numel(opts.meta)
-        success = opts.meta(ii).updatePath(opts.debug);
+        success = opts.meta(ii).UpdatePath(opts.debug);
         if success
             namesAdded = [namesAdded opts.meta(ii).name];
         end

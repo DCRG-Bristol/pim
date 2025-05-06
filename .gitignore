@@ -2,6 +2,7 @@
 *.pyc
 *.m~
 _old/
+*.asv
 
 # exclude everything
 **/pim-packages/*
