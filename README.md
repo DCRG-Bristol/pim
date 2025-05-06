@@ -10,9 +10,9 @@ Download/clone this repo and add it to your Matlab path. To persevre this after 
 
 - `pim install [package-name]`: install package by name
 - `pim uninstall [package-name]`: remove package, if installed
-- `pim search [package-name]`: search for package given name (checks Github and Matlab File Exchange)
 - `pim freeze`: lists all packages currently installed
 - `pim init`: adds all installed packages to path (run when Matlab starts up)
+- `pim clear`: clears all installed packages
 
 ## More details
 
@@ -24,7 +24,7 @@ __Install (searches FileExchange and Github):__
 >> pim install export_fig
 ```
 
-When installing, mpm checks for a file in the package called `install.m`, which it will run after confirming (or add `--force` to auto-confirm). It also checks for a file called `pathlist.twt` which tells it which paths (if any) to add.
+When installing, pim checks for a file in the package called `install.m`, which it will run after confirming (or add `--force` to auto-confirm). It also checks for a file called `pathlist.txt` which tells it which paths (if any) to add.
 
 __Install a Github release (by tag, branch, or commit)__
 
@@ -95,22 +95,6 @@ __Install/uninstall packages in a specific directory:__
 
 Note that the default installation directory is `pim-packages/`.
 
-## Environments ("Collections")
-
-pim has rudimentary support for managing collections of packages. To specify which collection to act on, use `-c [collection_name]`. Default collection is "default".
-
-```
->> pim install cbrewer -c test
-Using collection "test"
-Collecting 'cbrewer'...
-   Found url: https://www.mathworks.com/matlabcentral/fileexchange/58350-cbrewer2?download=true
-   Downloading https://www.mathworks.com/matlabcentral/fileexchange/58350-cbrewer2?download=true...
->> pim init -c test
-Using collection "test"
-   Adding to path: /Users/mobeets/code/pim/pim-packages/pim-collections/test/cbrewer
-   Added paths for 1 package(s).
-```
-
 ## Installing multiple packages from file
 
 ```
@@ -119,7 +103,7 @@ Using collection "test"
 
 Specifying a requirements file lets you install or search for multiple packages at once. See 'requirements-example.txt' for an example. Make sure to provide an absolute path to the file!
 
-To automatically confirm installation without being prompted, set `--approve`. Note that this is only available when installing packages from file.
+To automatically confirm installation without being prompted, set `--force`.
 
 ## What it does
 
@@ -129,10 +113,10 @@ If you restart Matlab, you'll want to run `pim init` to re-add all the folders i
 
 ## Troubleshooting
 
-Because there's no standard directory structure for a Matlab package, automatically adding paths can get a bit messy. When mpm downloads a package, it adds a single folder within that package to your Matlab path. If there are no `*.m` files in the package's base directory, it looks in folders called 'bin', 'src', 'lib', or 'code' instead. You can specify the name of an internal directory by passing in an `-n` or `internaldir` argument. To install a package without modifying any s, set `--nos`. Or to add _all_ subfolders in a package to the , set `--alls`.
+Because there's no standard directory structure for a Matlab package, automatically adding paths can get a bit messy. When pip downloads a package, it adds a single folder within that package to your Matlab path. If there are no `*.m` files in the package's base directory, it looks in folders called 'bin', 'src', 'lib', or 'code' instead. You can specify the name of an internal directory by passing in an `-n` or `internaldir` argument. To install a package without modifying any s, set `--nos`. Or to add _all_ subfolders in a package to the , set `--alls`.
 
 pim keeps track of the packages it's downloaded in a file called `pim.mat`, within each installation directory.
 
 ## Requirements
 
-pim should work cross-platform on versions Matlab 2014b and later. Also note that, starting with Matlab 2022, you may see a warning when using pim, as Matlab includes a built-in command of the same name (used for installing Matlab products). You may need to rename the file `pim.m` to something else, and then rename the function name on line 1 of this file to match, as well as the line containing "help pim".
+pim should work cross-platform on versions Matlab 2014b and later.
