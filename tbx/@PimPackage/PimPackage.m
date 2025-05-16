@@ -20,6 +20,19 @@ classdef PimPackage < handle
     end
 
     methods
+        function set.internalDir(obj,val)
+            obj.internalDir = strrep(string(val),'"','');
+        end
+        function set.installDir(obj,val)
+            obj.installDir = strrep(string(val),'"','');
+        end
+        function set.mdir(obj,val)
+            obj.mdir = strrep(string(val),'"','');
+        end
+
+    end
+
+    methods
         function remove(pkg,opts)
             arguments
                 pkg PimPackage

@@ -61,7 +61,7 @@ function readRequirementsFile(fileName, opts)
                 warning(i18n('requirements_installdir_override', num2str(ii)));
             end
         elseif ~isempty(line)
-            cmd = cmd + " -d " + opts.installDir;
+            cmd = cmd + " -d " + """" + opts.installDir + """";
         end
 
         % check if collection set on line
@@ -116,7 +116,25 @@ function readRequirementsFile(fileName, opts)
 
     % run all
     for ii = 1:numel(cmds)
+        % deal with "strings"
         cmd = strsplit(cmds{ii});
+        jj = 1;
+        while jj<length(cmd)
+            if startsWith(cmd{jj},'"')
+                for k = 1:length(cmd)
+                    if endsWith(cmd{k},'"')
+                        cmd{jj} = strjoin(cmd(jj:k),' ');
+                        cmd = cmd([1:jj,k+1:end]);
+                        break
+                    end
+                    if k == length(cmd)
+                        error('I am confused')
+                    end
+                end
+            end
+            jj = jj + 1;
+        end
+        % run
         pim(opts.action, cmd{:});
     end
 end

@@ -5,10 +5,10 @@ _old/
 *.asv
 
 # exclude everything
-**/pim-packages/*
+tbx/pim-packages/*
+# tbx/pim-packages/**/*
 *.mltbx
 
 
-# exception to the rule
-!mpm-packages/.gitkeep
+
 

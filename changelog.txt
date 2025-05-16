@@ -7,8 +7,11 @@ and this project adheres to [Explicit Versioning](https://github.com/exadra37-ve
 
 ## [Unreleased]
 ### Added
+- [2.2.1] - pim clear to uninstall everything
 ### Changed
+- [2.2.1] - now saves preferences to matlab preferences rather than a .mat file
 ### Deprecated
 ### Removed
 ### Fixed
 - [2.1.2] - exist function char vs string array #2
+- [2.2.2] - installing on paths with spaces in fixed
