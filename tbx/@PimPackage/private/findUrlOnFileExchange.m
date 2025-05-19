@@ -8,7 +8,13 @@ function url = findUrlOnFileExchange(pkg)
 
     % query file exchange
     apiUrl = 'https://api.mathworks.com/community/v1/search';
-    response = webread(apiUrl, 'query', query, 'scope', 'file-exchange');
+    try
+        response = webread(apiUrl, 'query', query, 'scope', 'file-exchange');
+    catch err
+        warning("Error searching for %s on the file excahnge, returning blank",query)
+        url = '';
+        return
+    end
 
     % if any packages contain package name exactly, return that one
     for ii = 1:numel(response.items)
